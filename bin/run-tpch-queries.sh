@@ -137,9 +137,30 @@ cold_run_sum=0
 best_hot_run_sum=0
 # run part of queries, set their index to query_array
 # query_array=(59 17 29 25 47 40 54)
-query_array=$(seq 1 22)
+# query_array=$(seq 1 22)
 # query_array=(22)
 # shellcheck disable=SC2068
+
+# Nếu biến môi trường TPCH_QUERY_ARRAY được set thì dùng nó, ngược lại dùng mặc định (1 đến 22)
+# if [ -z "$TPCH_QUERY_ARRAY" ]; then
+#     query_array=( $(seq 1 22) )
+# else
+#     query_array=( $TPCH_QUERY_ARRAY )
+# fi
+if [ -n "$TPCH_QUERY_ARRAY" ]; then
+    # Kiểm tra nếu chuỗi có dạng "số:số", ví dụ "1:18"
+    if [[ "$TPCH_QUERY_ARRAY" =~ ^([0-9]+):([0-9]+)$ ]]; then
+        start="${BASH_REMATCH[1]}"
+        end="${BASH_REMATCH[2]}"
+        query_array=( $(seq "$start" "$end") )
+    else
+        query_array=( $TPCH_QUERY_ARRAY )
+    fi
+else
+    query_array=( $(seq 1 22) )
+fi
+
+
 for i in ${query_array[@]}; do
     cold=0
     hot1=0
